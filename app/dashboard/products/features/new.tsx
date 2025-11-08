@@ -3,7 +3,7 @@
 import { SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useEffect, useState, type ChangeEvent, type FC } from "react";
 import { toast } from "sonner";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -45,7 +45,52 @@ type Category = {
   name: string;
 };
 
-type ProductItem = {
+type ProductCategory = {
+  documentId?: string;
+  name?: string;
+};
+
+type ProductImage = {
+  id?: string;
+  url?: string;
+  formats?: {
+    thumbnail?: {
+      url?: string;
+    };
+  };
+};
+
+type StrapiImageFormat = {
+  ext: string;
+  url: string;      // relative e.g. /uploads/thumbnail_...
+  mime: string;
+  name: string;
+  width: number;
+  height: number;
+  size?: number;
+  sizeInBytes?: number;
+  path?: string | null;
+};
+
+type StrapiMedia = {
+  id: number;
+  documentId: string;
+  name: string;
+  url: string;                        // relative e.g. /uploads/...
+  previewUrl?: string | null;
+  formats?: {
+    thumbnail?: StrapiImageFormat;
+    small?: StrapiImageFormat;
+    medium?: StrapiImageFormat;
+    large?: StrapiImageFormat;
+  };
+  width?: number;
+  height?: number;
+  mime?: string;
+};
+
+
+export type ProductItem = {
   id?: string;
   documentId?: string;
   name?: string;
@@ -53,8 +98,8 @@ type ProductItem = {
   price?: number;
   stock?: number;
   barcode?: string;
-  category?: { documentId?: string } | string | null;
-  image?: { url?: string; id?: string } | null;
+  category?: ProductCategory | string | null;
+  image?: StrapiMedia[] | StrapiMedia | null;   // ← واقعی
 };
 
 type NewProps = {
@@ -63,7 +108,7 @@ type NewProps = {
   isOpen?: boolean;
 };
 
-export const New: React.FC<NewProps> = ({ item = null, onSuccess, isOpen = false }) => {
+export const New: FC<NewProps> = ({ item = null, onSuccess, isOpen = false }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState<boolean>(false);
@@ -73,7 +118,7 @@ export const New: React.FC<NewProps> = ({ item = null, onSuccess, isOpen = false
   const [imageId, setImageId] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as Resolver<FormValues>,
     defaultValues: {
       name: "",
       description: "",
@@ -99,8 +144,16 @@ export const New: React.FC<NewProps> = ({ item = null, onSuccess, isOpen = false
             : item.category?.documentId ?? "",
       });
 
-      setImagePreview(item.image?.url ?? null);
-      setImageId(item.image?.id ?? null);
+      if (Array.isArray(item.image)) {
+        setImagePreview(item.image[0]?.url ?? null);
+        setImageId(item.image[0]?.id ? String(item.image[0].id) : null);
+      } else if (item.image) {
+        setImagePreview(item.image.url ?? null);
+        setImageId(item.image.id ? String(item.image.id) : null);
+      } else {
+        setImagePreview(null);
+        setImageId(null);
+      }
     } else {
       form.reset({
         name: "",
@@ -155,11 +208,9 @@ export const New: React.FC<NewProps> = ({ item = null, onSuccess, isOpen = false
         },
       });
 
-      const uploadedImage = (res.data && res.data[0]) as
-        | { url?: string; id?: string }
-        | undefined;
+      const uploadedImage = res.data[0] as StrapiMedia | undefined;
       setImagePreview(uploadedImage?.url ?? null);
-      setImageId(uploadedImage?.id ?? null);
+      setImageId(uploadedImage?.id ? String(uploadedImage.id) : null);
       toast.success("Image uploaded successfully");
     } catch (error) {
       toast.error("Image upload failed");
@@ -208,13 +259,13 @@ export const New: React.FC<NewProps> = ({ item = null, onSuccess, isOpen = false
         <SheetTitle>{item?.id ? "Edit" : "Add"} product</SheetTitle>
       </SheetHeader>
 
-      <Form {...form}>
+      <Form {...(form as any)}>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={(form.handleSubmit as any)(onSubmit)}
           className="space-y-6 px-6 h-full overflow-y-scroll pb-10"
         >
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="name"
             render={({ field }) => (
               <FormItem>
@@ -228,7 +279,7 @@ export const New: React.FC<NewProps> = ({ item = null, onSuccess, isOpen = false
           />
 
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="category"
             render={({ field }) => (
               <FormItem>
@@ -260,7 +311,7 @@ export const New: React.FC<NewProps> = ({ item = null, onSuccess, isOpen = false
           />
 
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="price"
             render={({ field }) => (
               <FormItem>
@@ -279,7 +330,7 @@ export const New: React.FC<NewProps> = ({ item = null, onSuccess, isOpen = false
           />
 
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="stock"
             render={({ field }) => (
               <FormItem>
@@ -293,7 +344,7 @@ export const New: React.FC<NewProps> = ({ item = null, onSuccess, isOpen = false
           />
 
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="barcode"
             render={({ field }) => (
               <FormItem>
@@ -307,7 +358,7 @@ export const New: React.FC<NewProps> = ({ item = null, onSuccess, isOpen = false
           />
 
           <FormField
-            control={form.control}
+            control={form.control as any}
             name="description"
             render={({ field }) => (
               <FormItem>

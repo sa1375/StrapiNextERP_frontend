@@ -1,7 +1,11 @@
 "use client";
 
-import { getColumns } from "./features/columns";
-import { DataTable } from "@/components/data-table";
+import {
+  getColumns,
+  type FilterChangeHandler,
+  type Filters,
+} from "./features/columns";
+import { DataTable } from "./features/data-table";
 import {
   Card,
   CardAction,
@@ -11,7 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import axiosInstance from "@/lib/axios";
 import {
   Select,
@@ -21,28 +25,42 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Sheet } from "@/components/ui/sheet";
-import { New } from "./features/new";
+import { New, type ProductItem } from "./features/new";
 import { toast } from "sonner";
 
+interface PaginationMeta {
+  page: number;
+  pageSize: number;
+  pageCount: number;
+  total: number;
+}
+
+interface ProductsResponse {
+  data: ProductItem[];
+  meta: {
+    pagination: PaginationMeta;
+  };
+}
+
 const Page = () => {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<ProductItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState(null);
+  const [meta, setMeta] = useState<PaginationMeta | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [filters, setFilters] = useState({ name: "", barcode: "" });
+  const [filters, setFilters] = useState<Filters>({ name: "", barcode: "" });
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedItem, setSelectedItem] = useState<ProductItem | null>(null);
 
-  const handleFilterChange = (key, value) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+  const handleFilterChange = useCallback<FilterChangeHandler>((key, value) => {
+    setFilters((prev) => ({ ...prev, [key]: value ?? "" }));
     setPage(1);
-  };
+  }, []);
 
-  const buildQuery = () => {
+  const buildQuery = useCallback(() => {
     const query = new URLSearchParams();
-    query.set("pagination[page]", page);
-    query.set("pagination[pageSize]", pageSize);
+    query.set("pagination[page]", page.toString());
+    query.set("pagination[pageSize]", pageSize.toString());
     query.set("populate[0]", "category");
     query.set("populate[1]", "image");
 
@@ -55,34 +73,36 @@ const Page = () => {
     }
 
     return query.toString();
-  };
+  }, [filters, page, pageSize]);
 
-  const fetchData = () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
-    axiosInstance
-      .get(`/api/products?${buildQuery()}`)
-      .then((response) => {
-        console.log("Fetched products:", response.data.data);
-        setProducts(response.data.data);
-        setMeta(response.data.meta.pagination);
-      })
-      .catch((error) => {
-        console.log("Failed to fetch products:", error);
-      })
-      .finally(() => setLoading(false));
-  };
+    try {
+      const { data } = await axiosInstance.get<ProductsResponse>(
+        `/api/products?${buildQuery()}`
+      );
+      console.log("Fetched products:", data.data);
+      setProducts(data.data);
+      setMeta(data.meta.pagination);
+    } catch (error) {
+      console.log("Failed to fetch products:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [buildQuery]);
 
   useEffect(() => {
-    fetchData();
-  }, [page, pageSize, filters]);
+    void fetchData();
+  }, [fetchData]);
 
-  const handlePageSizeChange = (value) => {
+  const handlePageSizeChange = (value: string) => {
     setPageSize(Number(value));
     setPage(1);
   };
 
-  const handleDelete = async (item) => {
-    if (!confirm(`Are you sure you want to delete "${item.name}"?`)) return;
+  const handleDelete = async (item: ProductItem) => {
+    if (!confirm(`Are you sure you want to delete "${item.name ?? ""}"?`))
+      return;
 
     try {
       await axiosInstance.delete(`/api/products/${item.documentId}`);
@@ -128,7 +148,7 @@ const Page = () => {
                 isOpen={sheetOpen}
                 onSuccess={() => {
                   setSheetOpen(false);
-                  fetchData();
+                  void fetchData();
                 }}
               />
             </Sheet>
@@ -209,7 +229,11 @@ const Page = () => {
                 variant="outline"
                 size="icon"
                 className="h-8 w-8"
-                onClick={() => setPage(meta?.pageCount)}
+                onClick={() => {
+                  if (meta?.pageCount) {
+                    setPage(meta.pageCount);
+                  }
+                }}
                 disabled={page === meta?.pageCount}
               >
                 »

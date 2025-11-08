@@ -38,7 +38,7 @@ export const getColumns = (
         label="Name"
         value={filters.name ?? ""}
         onChange={(value: string) => handleFilterChange("name", value)}
-        placeHolder="Filter Name..."
+        placeholder="Filter Name..."
       />
     ),
     cell: (info) => info.getValue<string>(),
@@ -48,7 +48,7 @@ export const getColumns = (
     header: () => (
       <ColumnFilter
         label="Description"
-        placeHolder={"Filter description..."}
+        placeholder="Filter description..."
         value={filters.description ?? ""}
         onChange={(val: string) => handleFilterChange("description", val)}
       />
