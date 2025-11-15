@@ -50,7 +50,7 @@ type ProductCategory = {
   name?: string;
 };
 
-type ProductImage = {
+export type ProductImage = {
   id?: string;
   url?: string;
   formats?: {

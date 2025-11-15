@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -22,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import axiosInstance from "@/lib/axios";
 
 const formSchema = z.object({
-  name: z.string().min(1).min(1).max(40),
+  name: z.string().min(1).max(40),
   description: z.string().min(5).max(200).optional(),
 });
 
@@ -62,7 +61,7 @@ export default function New({ item = null, onSuccess, isOpen }: NewProps) {
         description: "",
       });
     }
-  }, [item, isOpen,]);
+  }, [item, isOpen]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     SetLoading(true);

@@ -15,16 +15,14 @@ import {
   type ChangeEvent,
   type ReactNode,
 } from "react";
+import { format } from "date-fns";
 
 type ColumnFilterProps = {
   label: ReactNode;
   value?: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  /**
-   * @deprecated Use `placeholder` instead.
-   */
-  placeHolder?: string;
+  type: string;
 };
 
 export default function ColumnFilter({
@@ -32,7 +30,7 @@ export default function ColumnFilter({
   value = "",
   onChange,
   placeholder,
-  placeHolder,
+  type = "text",
 }: ColumnFilterProps) {
   const [inputValue, setInputValue] = useState(value);
   const [open, setOpen] = useState(false);
@@ -41,7 +39,7 @@ export default function ColumnFilter({
     setInputValue(value ?? "");
   }, [value]);
 
-  const resolvedPlaceholder = placeholder ?? placeHolder ?? "Filter value...";
+  const resolvedPlaceholder = placeholder ?? "Filter value...";
 
   const handleApply = useCallback(() => {
     onChange(inputValue);
@@ -80,12 +78,24 @@ export default function ColumnFilter({
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-52">
-            <Input
-              placeholder={resolvedPlaceholder}
-              value={inputValue}
-              onChange={handleInputChange}
-              className="mb-2"
-            />
+            {type === "date" ? (
+              <Input
+                type="date"
+                name="date_picker"
+                onChange={(e) =>
+                  setInputValue(
+                    format(new Date(e.target.value), "yyyy-mm-dd hh-mm")
+                  )
+                }
+              />
+            ) : type === "text" ? (
+              <Input
+                placeholder={resolvedPlaceholder}
+                value={inputValue}
+                onChange={handleInputChange}
+                className="mb-2"
+              />
+            ) : null}
             <Button onClick={handleApply} size="sm" className="w-full">
               Apply
             </Button>
