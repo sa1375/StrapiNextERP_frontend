@@ -6,11 +6,33 @@ import { ChartAreaInteractive } from "@/components/chart-area-interactive";
 import { DataTable } from "@/components/data-table";
 import { SectionCards } from "@/components/section-cards";
 import React from "react";
+import type { ColumnDef } from "@tanstack/react-table";
 
-import data from "./data.json";
+import rawData from "./data.json";
 import { useSession } from "next-auth/react";
 import { IconLoader } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
+
+type DashboardRow = {
+  id: number;
+  header: string;
+  type: string;
+  status: string;
+  target: string;
+  limit: string;
+  reviewer: string;
+};
+
+const columns: ColumnDef<DashboardRow>[] = [
+  { accessorKey: "header", header: "Header" },
+  { accessorKey: "type", header: "Type" },
+  { accessorKey: "status", header: "Status" },
+  { accessorKey: "target", header: "Target" },
+  { accessorKey: "limit", header: "Limit" },
+  { accessorKey: "reviewer", header: "Reviewer" },
+];
+
+const dashboardData = rawData as DashboardRow[];
 
 export default function page() {
   const { status } = useSession();
@@ -32,7 +54,7 @@ export default function page() {
           <div className="px-4 lg:px-6">
             <ChartAreaInteractive />
           </div>
-          <DataTable data={data} />
+          <DataTable columns={columns} data={dashboardData} />
         </div>
       </div>
     </div>

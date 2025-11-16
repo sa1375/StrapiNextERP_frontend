@@ -38,7 +38,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { getColumns } from "./features/columns";
 import type { Filters, FilterChangeHandler } from "./features/columns";
-import { DataTable } from "./features/data-table";
+import { DataTable } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
 import { useCallback, useEffect, useState } from "react";
 import axiosInstance from "@/lib/axios";

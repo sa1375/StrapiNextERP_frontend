@@ -5,7 +5,7 @@ import {
   type FilterChangeHandler,
   type Filters,
 } from "./features/columns";
-import { DataTable } from "./features/data-table";
+import { DataTable } from "@/components/data-table";
 import {
   Card,
   CardAction,
