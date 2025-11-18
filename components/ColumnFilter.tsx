@@ -22,7 +22,7 @@ type ColumnFilterProps = {
   value?: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  type: string;
+  type?: string;
 };
 
 export default function ColumnFilter({
