@@ -204,9 +204,11 @@ export default function POS() {
 
     setSaving(true);
     try {
+      const invoiceNumber = `POS-${Date.now()}`;
+
       const salePayload: SalePayload = {
         customer_name: DEFAULT_CUSTOMER,
-        invoice_number: "0",
+        invoice_number: invoiceNumber,
         date: new Date(),
         notes: DEFAULT_CUSTOMER,
         products: cart.map((item) => ({
