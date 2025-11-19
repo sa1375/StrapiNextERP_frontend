@@ -5,16 +5,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import SessionWrapper from "@/components/SessionWrapper";
 import { Toaster } from "sonner";
-
-const Inter = localFont({
-  src: [
-    {
-      path: "../assets/fonts/Inter-VariableFont.ttf",
-      weight: "400",
-      style: "normal",
-    },
-  ],
-});
+import { inter } from "@/lib/fonts";
 
 export const metadata: Metadata = {
   title: "Nava ERP | Landing",
@@ -29,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${Inter.className} antialiased`}>
+      <body className={`${inter.className} antialiased`}>
         <SessionWrapper>
           <ThemeProvider
             attribute="class"
