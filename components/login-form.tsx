@@ -1,74 +1,63 @@
-// /components/login-form.tsx 
+// /components/login-form.tsx
 
-"use client";
+'use client';
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { ChangeEvent, SyntheticEvent, useState } from "react";
-import { signIn } from "next-auth/react";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+} from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { ChangeEvent, SyntheticEvent, useState } from 'react';
+import { signIn } from 'next-auth/react';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
-  const [formData, SetFormData] = useState<{ email: string; password: string }>(
-    { email: "", password: "" }
-  );
+export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
+  const [formData, SetFormData] = useState<{ email: string; password: string }>({
+    email: '',
+    password: '',
+  });
 
   const [loading, setLoading] = useState(false);
-  const router = useRouter() ;
+  const router = useRouter();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     SetFormData((prev) => ({ ...prev, [name]: value }));
   };
-  
-  const handleLogin = async (e : SyntheticEvent) => {
-    e.preventDefault() ; 
+
+  const handleLogin = async (e: SyntheticEvent) => {
+    e.preventDefault();
     setLoading(true);
 
-    const res = await signIn("credentials", {
+    const res = await signIn('credentials', {
       redirect: false,
       email: formData.email,
-      password : formData.password
-    }) ;
-    console.log(res);
-    
-    if ( res?.ok) {
-      toast.success("successfull Login");
-      router.push("/dashboard")
-    }else{
-      toast.error("Invalid credentials")
+      password: formData.password,
+    });
+
+    if (res?.ok) {
+      toast.success('successfull Login');
+      router.push('/dashboard');
+    } else {
+      toast.error('Invalid credentials');
     }
 
     setLoading(false);
-  }
+  };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Welcome back</CardTitle>
-          <CardDescription>
-            Login with your Apple or Google account
-          </CardDescription>
+          <CardDescription>Login with your Apple or Google account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin}>
@@ -111,10 +100,7 @@ export function LoginForm({
               <Field>
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <a
-                    href="#"
-                    className="ml-auto text-sm underline-offset-4 hover:underline"
-                  >
+                  <a href="#" className="ml-auto text-sm underline-offset-4 hover:underline">
                     Forgot your password?
                   </a>
                 </div>
@@ -129,7 +115,7 @@ export function LoginForm({
               </Field>
               <Field>
                 <Button type="submit" disabled={loading}>
-                  {loading ? "Logging In ..." : "Login"}
+                  {loading ? 'Logging In ...' : 'Login'}
                 </Button>
                 <FieldDescription className="text-center">
                   Don&apos;t have an account? <a href="register">Sign up</a>
@@ -140,12 +126,9 @@ export function LoginForm({
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+        By clicking continue, you agree to our <a href="#">Terms of Service</a> and{' '}
+        <a href="#">Privacy Policy</a>.
       </FieldDescription>
     </div>
   );
 }
-
-
-
